@@ -1,0 +1,105 @@
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local character = script.Parent
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+-- IDs das animações padrão
+local idleAnimId = "rbxassetid://133154970795589"
+local walkAnimId = "rbxassetid://80519915591115"
+local runAnimId = "rbxassetid://106434105456882"
+
+-- IDs das animações para espada
+local swordWalkAnimId = "rbxassetid://98648901011136"
+local swordRunAnimId = "rbxassetid://123654464165022"
+
+-- Velocidades
+local normalSpeed = 16
+local runSpeed = 26
+local isRunning = false
+
+-- Criar animações padrão
+local idleAnim = Instance.new("Animation")
+idleAnim.AnimationId = idleAnimId
+local idleTrack = humanoid:LoadAnimation(idleAnim)
+
+local walkAnim = Instance.new("Animation")
+walkAnim.AnimationId = walkAnimId
+local walkTrack = humanoid:LoadAnimation(walkAnim)
+
+local runAnim = Instance.new("Animation")
+runAnim.AnimationId = runAnimId
+local runTrack = humanoid:LoadAnimation(runAnim)
+
+-- Criar animações para espada
+local swordWalkAnim = Instance.new("Animation")
+swordWalkAnim.AnimationId = swordWalkAnimId
+local swordWalkTrack = humanoid:LoadAnimation(swordWalkAnim)
+
+local swordRunAnim = Instance.new("Animation")
+swordRunAnim.AnimationId = swordRunAnimId
+local swordRunTrack = humanoid:LoadAnimation(swordRunAnim)
+
+-- Função para detectar se está segurando uma Tool da categoria "Espada"
+local function segurandoEspada()
+	local tool = character:FindFirstChildOfClass("Tool")
+	if tool then
+		local categoria = tool:FindFirstChild("Categoria")
+		if categoria and categoria:IsA("StringValue") then
+			return categoria.Value == "Espada"
+		end
+	end
+	return false
+end
+
+-- Função para tocar somente uma animação por vez, parando todas as outras
+local function playOnly(trackToPlay)
+	local tracks = {idleTrack, walkTrack, runTrack, swordWalkTrack, swordRunTrack}
+	for _, track in pairs(tracks) do
+		if track ~= trackToPlay and track.IsPlaying then
+			track:Stop()
+		end
+	end
+	if not trackToPlay.IsPlaying then
+		trackToPlay:Play()
+	end
+end
+
+-- Shift pressionado e solto
+UserInputService.InputBegan:Connect(function(input, gpe)
+	if gpe then return end
+	if input.KeyCode == Enum.KeyCode.LeftShift then
+		isRunning = true
+		humanoid.WalkSpeed = runSpeed
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input, gpe)
+	if input.KeyCode == Enum.KeyCode.LeftShift then
+		isRunning = false
+		humanoid.WalkSpeed = normalSpeed
+	end
+end)
+
+-- Loop para detectar movimento e trocar animações
+RunService.RenderStepped:Connect(function()
+	local speed = (rootPart.Velocity * Vector3.new(1, 0, 1)).Magnitude
+	local usandoEspada = segurandoEspada()
+
+	if speed < 1 then
+		playOnly(idleTrack)
+	elseif isRunning then
+		if usandoEspada then
+			playOnly(swordRunTrack)
+		else
+			playOnly(runTrack)
+		end
+	else
+		if usandoEspada then
+			playOnly(swordWalkTrack)
+		else
+			playOnly(walkTrack)
+		end
+	end
+end)
