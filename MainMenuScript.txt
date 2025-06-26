@@ -1,0 +1,160 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local gui = script.Parent
+
+gui.IgnoreGuiInset = true
+
+if RunService:IsRunning() then
+	gui.Enabled = true
+end
+
+-- Referências aos elementos
+local startButton = gui:WaitForChild("StartButton")
+local creditsButton = gui:WaitForChild("CreditsButton")
+local creditsLabel = gui:WaitForChild("CreditsLabel")
+local closeButton = gui:WaitForChild("CloseButton")
+local CreditsText = gui:WaitForChild("CreditsText")
+local fadeFrame = gui:WaitForChild("FadeFrame")
+local creditsLabel2 = gui:WaitForChild("CreditsLabel2")
+local creditsLabel3 = gui:WaitForChild("CreditsLabel3")
+
+local skipButton = gui:WaitForChild("SkipButton")
+skipButton.Visible = false
+
+-- Funções de fade
+local function fadeGui(guiObject, targetTransparency, duration)
+	local tweenInfo = TweenInfo.new(duration or 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+	local props = {}
+	if guiObject:IsA("TextButton") or guiObject:IsA("TextLabel") then
+		props.BackgroundTransparency = targetTransparency
+		props.TextTransparency = targetTransparency
+	elseif guiObject:IsA("ImageButton") or guiObject:IsA("ImageLabel") then
+		props.ImageTransparency = targetTransparency
+	elseif guiObject:IsA("Frame") then
+		props.BackgroundTransparency = targetTransparency
+	end
+
+	local tween = TweenService:Create(guiObject, tweenInfo, props)
+	tween:Play()
+	return tween
+end
+
+-- Travar a câmera no menu
+local cameraPosition = Vector3.new(-265.112, 39.6, 381.258)
+local cameraLookAt = cameraPosition + Vector3.new(1, 0, 0)
+
+camera.CameraType = Enum.CameraType.Scriptable
+camera.CFrame = CFrame.new(cameraPosition, cameraLookAt)
+
+-- Variável para controle do skip
+local isSkipping = false
+
+skipButton.MouseButton1Click:Connect(function()
+	isSkipping = true
+end)
+
+-- Iniciar o jogo com fade in/out
+startButton.MouseButton1Click:Connect(function()
+	-- FADE IN: escurecer a tela
+	fadeFrame.Visible = true
+	fadeGui(fadeFrame, 0, 0.6) -- de transparente (1) para visível (0)
+	wait(1)
+
+	-- Mostrar botão Skip e iniciar sequência de "Dream1" até "Dream5"
+	skipButton.Visible = true
+	isSkipping = false
+
+	for i = 1, 5 do
+		if isSkipping then
+			break
+		end
+
+		local dreamLabel = gui:WaitForChild("Dream" .. i)
+		dreamLabel.Visible = true
+		dreamLabel.BackgroundTransparency = 1
+		dreamLabel.TextTransparency = 1
+
+		local fadeInTween = fadeGui(dreamLabel, 0, 0.8) -- Fade in
+		fadeInTween.Completed:Wait()
+
+		-- Espera 3 segundos ou até skip
+		local timer = 0
+		while timer < 3 do
+			if isSkipping then
+				break
+			end
+			wait(0.1)
+			timer = timer + 0.1
+		end
+
+		local fadeOutTween = fadeGui(dreamLabel, 1, 0.8) -- Fade out
+		fadeOutTween.Completed:Wait()
+		dreamLabel.Visible = false
+	end
+
+	skipButton.Visible = false
+
+	-- Esconder botões e liberar a câmera
+	startButton.Visible = false
+	CreditsText.Visible = false
+	creditsLabel.Visible = false
+	creditsButton.Visible = false
+	closeButton.Visible = false
+	creditsLabel2.Visible = false
+	creditsLabel3.Visible = false
+
+	camera.CameraType = Enum.CameraType.Custom
+	wait(1)
+
+	-- FADE OUT: clarear a tela
+	fadeGui(fadeFrame, 1, 0.6)
+	wait(0.6)
+	fadeFrame.Visible = false
+end)
+
+-- Mostrar créditos
+creditsButton.MouseButton1Click:Connect(function()
+	creditsLabel.Text = "Lucabr2805"
+	creditsLabel.Visible = true
+	creditsLabel2.Visible = true
+	creditsLabel3.Visible = true
+	closeButton.Visible = true
+	CreditsText.Visible = true
+
+	fadeGui(startButton, 1)
+	fadeGui(creditsButton, 1)
+
+	fadeGui(creditsLabel, 0)
+	fadeGui(creditsLabel2, 0)
+	fadeGui(creditsLabel3, 0)
+	fadeGui(closeButton, 0)
+	fadeGui(CreditsText, 0)
+end)
+
+-- Fechar créditos e voltar pro menu
+closeButton.MouseButton1Click:Connect(function()
+	fadeGui(creditsLabel, 1)
+	fadeGui(creditsLabel2, 1)
+	fadeGui(creditsLabel3, 1)
+	fadeGui(closeButton, 1)
+	fadeGui(CreditsText, 1)
+
+	wait(0.5)
+
+	startButton.Visible = true
+	creditsButton.Visible = true
+
+	fadeGui(startButton, 0)
+	fadeGui(creditsButton, 0)
+
+	creditsLabel.Visible = false
+	closeButton.Visible = false
+	creditsLabel2.Visible = false
+	creditsLabel3.Visible = false
+end)
