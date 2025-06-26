@@ -1,9 +1,9 @@
--- DialogueClient (LocalScript em StarterPlayerScripts)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DialogueEvent = ReplicatedStorage:WaitForChild("DialogueEvent")
 local DialogueData = require(ReplicatedStorage:WaitForChild("DialogueData"))
 
-local gui = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("DialogueGUI")
+local player = game.Players.LocalPlayer
+local gui = player:WaitForChild("PlayerGui"):WaitForChild("DialogueGUI")
 local frame = gui:WaitForChild("Frame")
 local nameLabel = frame:WaitForChild("NameLabel")
 local dialogueText = frame:WaitForChild("DialogueText")
@@ -12,23 +12,48 @@ local nextButton = frame:WaitForChild("NextButton")
 local currentLines = {}
 local currentIndex = 1
 
-nextButton.MouseButton1Click:Connect(function()
-    currentIndex += 1
-    if currentLines[currentIndex] then
-        dialogueText.Text = currentLines[currentIndex]
-    else
-        frame.Visible = false
-    end
-end)
+-- Diálogo padrão para quem está sem espada
+local semEspadaDialogue = {
+	"Então você quer sair em uma aventura filho?",
+	"Ok! Eu te aprovo a sair para uma aventura...",
+	"Mas antes, pegue a espada no galpão atrás de você porque lá fora é muito perigoso...",
+	"Ela provavelmente deve estar entre as caixas!"
+}
 
+-- Função para mostrar a próxima fala
+local function showNextLine()
+	currentIndex += 1
+	if currentLines[currentIndex] then
+		dialogueText.Text = currentLines[currentIndex]
+	else
+		frame.Visible = false
+	end
+end
+
+nextButton.MouseButton1Click:Connect(showNextLine)
+
+-- Evento que inicia o diálogo
 DialogueEvent.OnClientEvent:Connect(function(npcName)
-    local data = DialogueData[npcName]
-    if not data then return end
+	local hasSword = false
 
-    currentLines = data.Lines
-    currentIndex = 1
+	-- Verifica se o jogador está segurando uma tool com atributo "Espada"
+	local character = player.Character or player.CharacterAdded:Wait()
+	local tool = character:FindFirstChildOfClass("Tool")
+	if tool and tool:GetAttribute("Categoria") == "Espada" then
+		hasSword = true
+	end
 
-    nameLabel.Text = data.Name
-    dialogueText.Text = currentLines[currentIndex]
-    frame.Visible = true
+	if hasSword then
+		local data = DialogueData[npcName]
+		if not data then return end
+		currentLines = data.Lines
+		nameLabel.Text = data.Name
+	else
+		currentLines = semEspadaDialogue
+		nameLabel.Text = "Vassoler"
+	end
+
+	currentIndex = 1
+	dialogueText.Text = currentLines[currentIndex]
+	frame.Visible = true
 end)
