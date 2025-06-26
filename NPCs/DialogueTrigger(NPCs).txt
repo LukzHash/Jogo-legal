@@ -1,0 +1,10 @@
+-- DialogueTrigger (Script dentro do model do NPC)
+local prompt = script.Parent:WaitForChild("Head"):WaitForChild("ProximityPrompt")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local DialogueEvent = Instance.new("RemoteEvent")
+DialogueEvent.Name = "DialogueEvent"
+DialogueEvent.Parent = ReplicatedStorage
+
+prompt.Triggered:Connect(function(player)
+    DialogueEvent:FireClient(player, script.Parent.Name)
+end)

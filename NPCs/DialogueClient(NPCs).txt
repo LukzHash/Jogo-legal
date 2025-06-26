@@ -1,0 +1,34 @@
+-- DialogueClient (LocalScript em StarterPlayerScripts)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local DialogueEvent = ReplicatedStorage:WaitForChild("DialogueEvent")
+local DialogueData = require(ReplicatedStorage:WaitForChild("DialogueData"))
+
+local gui = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("DialogueGUI")
+local frame = gui:WaitForChild("Frame")
+local nameLabel = frame:WaitForChild("NameLabel")
+local dialogueText = frame:WaitForChild("DialogueText")
+local nextButton = frame:WaitForChild("NextButton")
+
+local currentLines = {}
+local currentIndex = 1
+
+nextButton.MouseButton1Click:Connect(function()
+    currentIndex += 1
+    if currentLines[currentIndex] then
+        dialogueText.Text = currentLines[currentIndex]
+    else
+        frame.Visible = false
+    end
+end)
+
+DialogueEvent.OnClientEvent:Connect(function(npcName)
+    local data = DialogueData[npcName]
+    if not data then return end
+
+    currentLines = data.Lines
+    currentIndex = 1
+
+    nameLabel.Text = data.Name
+    dialogueText.Text = currentLines[currentIndex]
+    frame.Visible = true
+end)

@@ -1,0 +1,22 @@
+-- DialogueData (ModuleScript em ReplicatedStorage)
+local DialogueData = {
+    ["NPC"] = {
+        Name = "Vassoler",
+        Lines = {
+            "Olá, aventureiro!",
+            "Você está pronto para enfrentar os desafios?",
+            "Boa sorte em sua jornada!"
+        }
+    },
+
+    -- Exemplo de outro NPC:
+    -- ["OutroNPC"] = {
+    --     Name = "Mestre Koi",
+    --     Lines = {
+    --         "Você já treinou o suficiente hoje?",
+    --         "Volte quando estiver mais forte."
+    --     }
+    -- },
+}
+
+return DialogueData

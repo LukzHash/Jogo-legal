@@ -1,0 +1,19 @@
+StarterGui
+├── DialogueGUI (ScreenGui)
+│   ├── Frame
+│   │   ├── NameLabel(TextLabel)
+│   │   ├── DialogueText(TextLabel)
+│   │   └── NextButton(textButton)
+ReplicatedStorage
+├── DialogueData (ModuleScript)
+StarterPlayer
+├── StarterPlayerScripts
+│   └── DialogueClient (LocalScript)
+Workspace
+├── NPCS(talk)
+│   └── NPC
+│       ├── Humanoid
+│       ├── VassolerNPC
+│       ├── Head
+│       │   └── ProximityPrompt
+│       └── DialogueTrigger (Script)
